@@ -1,0 +1,20 @@
+export enum TaskType {
+  REGULAR = 'REGULAR',
+  BONUS = 'BONUS',
+}
+
+export enum TaskPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL',
+}
+
+export enum TaskStatus {
+  ASSIGNED = 'ASSIGNED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  PARTIALLY_COMPLETED = 'PARTIALLY_COMPLETED',
+  VERIFIED = 'VERIFIED',
+  REJECTED = 'REJECTED',
+}
