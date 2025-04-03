@@ -1,0 +1,120 @@
+import { MigrationInterface, QueryRunner } from "typeorm";
+
+export class InitialSchema1741600000000 implements MigrationInterface {
+    name = 'InitialSchema1741600000000'
+
+    public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`CREATE TABLE "department_assignments" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" uuid NOT NULL, "departmentId" uuid NOT NULL, "rate" smallint NOT NULL, "isActive" boolean NOT NULL DEFAULT true, "startDate" date NOT NULL, "endDate" date, "assignedBy" uuid NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_c28dfc46e1c3e3ca6c963496ce7" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE INDEX "IDX_81fa58b3c08f5d2c259df763be" ON "department_assignments" ("userId") `);
+        await queryRunner.query(`CREATE INDEX "IDX_a027d9ecf8af2b17f5f0b0d888" ON "department_assignments" ("departmentId") `);
+        await queryRunner.query(`CREATE INDEX "IDX_32511e2c440c57a71b62216933" ON "department_assignments" ("userId", "departmentId", "isActive") `);
+        await queryRunner.query(`CREATE TYPE "public"."users_role_enum" AS ENUM('SUPERADMIN', 'HR', 'DEPARTMENT_HEAD', 'EMPLOYEE')`);
+        await queryRunner.query(`CREATE TYPE "public"."users_status_enum" AS ENUM('ACTIVE', 'FROZEN', 'VACATION', 'SICK_LEAVE', 'TERMINATED', 'BLOCKED')`);
+        await queryRunner.query(`CREATE TABLE "users" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "login" character varying(64) NOT NULL, "passwordHash" character varying(255) NOT NULL, "role" "public"."users_role_enum" NOT NULL DEFAULT 'EMPLOYEE', "fullName" character varying(200) NOT NULL, "pinfl" character varying(14), "phone" character varying(32), "email" character varying(200), "position" character varying(200), "baseSalary" numeric(14,2) NOT NULL DEFAULT '0', "photoFileId" character varying(64), "passportFileIds" jsonb NOT NULL DEFAULT '[]', "status" "public"."users_status_enum" NOT NULL DEFAULT 'ACTIVE', "hireDate" date, "terminatedAt" date, "birthDate" date, "address" text, "mustChangePassword" boolean NOT NULL DEFAULT false, "lastLoginAt" TIMESTAMP WITH TIME ZONE, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_a3ffb1c0c8416b9fc6f907b7433" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_2d443082eccd5198f95f2a36e2" ON "users" ("login") `);
+        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_74e519e60af2fcc10faa6d19a5" ON "users" ("pinfl") WHERE "pinfl" IS NOT NULL`);
+        await queryRunner.query(`CREATE TABLE "departments" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(200) NOT NULL, "code" character varying(32) NOT NULL, "description" text, "headUserId" uuid, "isActive" boolean NOT NULL DEFAULT true, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_839517a681a86bb84cbcc6a1e9d" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_91fddbe23e927e1e525c152baa" ON "departments" ("code") `);
+        await queryRunner.query(`CREATE TABLE "announcements" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "title" character varying(255) NOT NULL, "body" text NOT NULL, "departmentId" uuid, "createdBy" uuid NOT NULL, "isPinned" boolean NOT NULL DEFAULT false, "expiresAt" TIMESTAMP WITH TIME ZONE, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_b3ad760876ff2e19d58e05dc8b0" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE INDEX "IDX_6179703bdd7f950ba34c0c4d5f" ON "announcements" ("departmentId") `);
+        await queryRunner.query(`CREATE TYPE "public"."attendance_records_status_enum" AS ENUM('PRESENT', 'LATE', 'ABSENT', 'EXCUSED', 'REMOTE')`);
+        await queryRunner.query(`CREATE TABLE "attendance_records" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" uuid NOT NULL, "departmentId" uuid NOT NULL, "date" date NOT NULL, "status" "public"."attendance_records_status_enum" NOT NULL, "checkIn" TIME, "checkOut" TIME, "note" text, "markedBy" uuid NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_2f71e3a7032285cfdf74e5cae79" UNIQUE ("userId", "date"), CONSTRAINT "PK_946920332f5bc9efad3f3023b96" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE INDEX "IDX_3e24aad29f272e2606de046242" ON "attendance_records" ("userId") `);
+        await queryRunner.query(`CREATE INDEX "IDX_506ad1dd3350fb6f731e459db8" ON "attendance_records" ("departmentId") `);
+        await queryRunner.query(`CREATE INDEX "IDX_9fb6ef15f899489af7e47b6c83" ON "attendance_records" ("date") `);
+        await queryRunner.query(`CREATE TYPE "public"."calendar_days_type_enum" AS ENUM('WORKING', 'WEEKEND', 'HOLIDAY', 'NON_WORKING')`);
+        await queryRunner.query(`CREATE TABLE "calendar_days" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "date" date NOT NULL, "type" "public"."calendar_days_type_enum" NOT NULL, "title" character varying(200), "createdBy" uuid NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_4e038bb33a6b17e98fee1f30ad9" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_1c04d56e8833eb6827f104f17e" ON "calendar_days" ("date") `);
+        await queryRunner.query(`CREATE TABLE "monthly_kpi_summaries" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" uuid NOT NULL, "year" smallint NOT NULL, "month" smallint NOT NULL, "totalPoints" integer NOT NULL DEFAULT '0', "taskPoints" integer NOT NULL DEFAULT '0', "bonusPoints" integer NOT NULL DEFAULT '0', "reportPoints" integer NOT NULL DEFAULT '0', "manualPoints" integer NOT NULL DEFAULT '0', "tasksAssigned" integer NOT NULL DEFAULT '0', "tasksVerified" integer NOT NULL DEFAULT '0', "reportsSubmitted" integer NOT NULL DEFAULT '0', "averageReportRating" numeric(5,2) NOT NULL DEFAULT '0', "attendanceRatio" numeric(5,2) NOT NULL DEFAULT '0', "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_ec4a09699ee232a8f5dfb966d78" UNIQUE ("userId", "year", "month"), CONSTRAINT "PK_dbaeab12048e3fab05bf4ce8573" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE INDEX "IDX_4469d4d7eae7931b1666767e38" ON "monthly_kpi_summaries" ("userId") `);
+        await queryRunner.query(`CREATE TYPE "public"."point_transactions_source_enum" AS ENUM('TASK', 'BONUS_TASK', 'DAILY_REPORT', 'MANUAL')`);
+        await queryRunner.query(`CREATE TABLE "point_transactions" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" uuid NOT NULL, "departmentId" uuid, "points" smallint NOT NULL, "source" "public"."point_transactions_source_enum" NOT NULL, "referenceId" character varying(64), "reason" text, "year" smallint NOT NULL, "month" smallint NOT NULL, "createdBy" uuid NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_ceb5185b63f070e23d65509b0a7" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE INDEX "IDX_557e0c8c5a7a1a449723de7682" ON "point_transactions" ("userId") `);
+        await queryRunner.query(`CREATE INDEX "IDX_31f1173cfe2bf43c86aeaad50c" ON "point_transactions" ("userId", "year", "month") `);
+        await queryRunner.query(`CREATE TABLE "organization_settings" ("id" smallint NOT NULL DEFAULT '1', "name" character varying(200) NOT NULL DEFAULT 'Xodimlar HRMS', "description" text, "logoFileId" character varying(64), "primaryColor" character varying(16) NOT NULL DEFAULT '#1d4ed8', "currency" character varying(8) NOT NULL DEFAULT 'UZS', "pointValue" numeric(14,2) NOT NULL DEFAULT '10000', "headTeamBonusRate" numeric(5,2) NOT NULL DEFAULT '20', "headPointShareRate" numeric(5,2) NOT NULL DEFAULT '10', "reportDeadlineHour" smallint NOT NULL DEFAULT '17', "reportMaxPoints" smallint NOT NULL DEFAULT '5', "timezone" character varying(64) NOT NULL DEFAULT 'Asia/Tashkent', "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_67a83a1c6256f927137c33ddd7e" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TYPE "public"."payroll_records_status_enum" AS ENUM('CALCULATED', 'PAID')`);
+        await queryRunner.query(`CREATE TABLE "payroll_records" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" uuid NOT NULL, "year" smallint NOT NULL, "month" smallint NOT NULL, "baseAmount" numeric(14,2) NOT NULL, "attendanceAmount" numeric(14,2) NOT NULL, "bonusAmount" numeric(14,2) NOT NULL, "deductionAmount" numeric(14,2) NOT NULL DEFAULT '0', "totalAmount" numeric(14,2) NOT NULL, "currency" character varying(8) NOT NULL DEFAULT 'UZS', "status" "public"."payroll_records_status_enum" NOT NULL DEFAULT 'CALCULATED', "breakdown" jsonb NOT NULL, "note" text, "calculatedBy" uuid NOT NULL, "calculatedAt" TIMESTAMP WITH TIME ZONE NOT NULL, "paidBy" uuid, "paidAt" TIMESTAMP WITH TIME ZONE, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_c339411aec0cfb590c88342b886" UNIQUE ("userId", "year", "month"), CONSTRAINT "PK_869cabe268deb5726e742f2d3f0" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE INDEX "IDX_9e280c054a0c8dfa99af54824a" ON "payroll_records" ("userId") `);
+        await queryRunner.query(`CREATE INDEX "IDX_0391ab9579160d9ac073730a61" ON "payroll_records" ("status") `);
+        await queryRunner.query(`CREATE TYPE "public"."tasks_type_enum" AS ENUM('REGULAR', 'BONUS')`);
+        await queryRunner.query(`CREATE TYPE "public"."tasks_priority_enum" AS ENUM('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')`);
+        await queryRunner.query(`CREATE TYPE "public"."tasks_status_enum" AS ENUM('ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'PARTIALLY_COMPLETED', 'VERIFIED', 'REJECTED')`);
+        await queryRunner.query(`CREATE TABLE "tasks" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "title" character varying(255) NOT NULL, "description" text, "assigneeId" uuid NOT NULL, "departmentId" uuid NOT NULL, "createdBy" uuid NOT NULL, "type" "public"."tasks_type_enum" NOT NULL DEFAULT 'REGULAR', "priority" "public"."tasks_priority_enum" NOT NULL DEFAULT 'MEDIUM', "status" "public"."tasks_status_enum" NOT NULL DEFAULT 'ASSIGNED', "dueDate" date, "maxPoints" smallint NOT NULL DEFAULT '10', "awardedPoints" smallint, "employeeComment" text, "reviewComment" text, "submittedAt" TIMESTAMP WITH TIME ZONE, "verifiedBy" uuid, "verifiedAt" TIMESTAMP WITH TIME ZONE, "attachmentFileIds" jsonb NOT NULL DEFAULT '[]', "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_8d12ff38fcc62aaba2cab748772" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE INDEX "IDX_9a16d2c86252529f622fa53f1e" ON "tasks" ("assigneeId") `);
+        await queryRunner.query(`CREATE INDEX "IDX_16f7d1a4b2676ca48c6c1a7b0e" ON "tasks" ("departmentId") `);
+        await queryRunner.query(`CREATE INDEX "IDX_6086c8dafbae729a930c04d865" ON "tasks" ("status") `);
+        await queryRunner.query(`CREATE TYPE "public"."employee_status_history_fromstatus_enum" AS ENUM('ACTIVE', 'FROZEN', 'VACATION', 'SICK_LEAVE', 'TERMINATED', 'BLOCKED')`);
+        await queryRunner.query(`CREATE TYPE "public"."employee_status_history_tostatus_enum" AS ENUM('ACTIVE', 'FROZEN', 'VACATION', 'SICK_LEAVE', 'TERMINATED', 'BLOCKED')`);
+        await queryRunner.query(`CREATE TABLE "employee_status_history" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" uuid NOT NULL, "fromStatus" "public"."employee_status_history_fromstatus_enum" NOT NULL, "toStatus" "public"."employee_status_history_tostatus_enum" NOT NULL, "reason" text, "medicalReason" text, "startDate" date, "endDate" date, "changedBy" uuid NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_37f11e71a19e5ff8fb0952743cc" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE INDEX "IDX_68bb5bdec278c3af08ad6a2756" ON "employee_status_history" ("userId") `);
+        await queryRunner.query(`ALTER TABLE "department_assignments" ADD CONSTRAINT "FK_81fa58b3c08f5d2c259df763be4" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "department_assignments" ADD CONSTRAINT "FK_a027d9ecf8af2b17f5f0b0d8885" FOREIGN KEY ("departmentId") REFERENCES "departments"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "departments" ADD CONSTRAINT "FK_69025af2ac3cdaa692608056ed9" FOREIGN KEY ("headUserId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "announcements" ADD CONSTRAINT "FK_6179703bdd7f950ba34c0c4d5f2" FOREIGN KEY ("departmentId") REFERENCES "departments"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "attendance_records" ADD CONSTRAINT "FK_3e24aad29f272e2606de0462420" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "attendance_records" ADD CONSTRAINT "FK_506ad1dd3350fb6f731e459db83" FOREIGN KEY ("departmentId") REFERENCES "departments"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "point_transactions" ADD CONSTRAINT "FK_557e0c8c5a7a1a449723de76822" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "payroll_records" ADD CONSTRAINT "FK_9e280c054a0c8dfa99af54824ab" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "tasks" ADD CONSTRAINT "FK_9a16d2c86252529f622fa53f1e3" FOREIGN KEY ("assigneeId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "tasks" ADD CONSTRAINT "FK_16f7d1a4b2676ca48c6c1a7b0ef" FOREIGN KEY ("departmentId") REFERENCES "departments"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "employee_status_history" ADD CONSTRAINT "FK_68bb5bdec278c3af08ad6a27564" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`ALTER TABLE "employee_status_history" DROP CONSTRAINT "FK_68bb5bdec278c3af08ad6a27564"`);
+        await queryRunner.query(`ALTER TABLE "tasks" DROP CONSTRAINT "FK_16f7d1a4b2676ca48c6c1a7b0ef"`);
+        await queryRunner.query(`ALTER TABLE "tasks" DROP CONSTRAINT "FK_9a16d2c86252529f622fa53f1e3"`);
+        await queryRunner.query(`ALTER TABLE "payroll_records" DROP CONSTRAINT "FK_9e280c054a0c8dfa99af54824ab"`);
+        await queryRunner.query(`ALTER TABLE "point_transactions" DROP CONSTRAINT "FK_557e0c8c5a7a1a449723de76822"`);
+        await queryRunner.query(`ALTER TABLE "attendance_records" DROP CONSTRAINT "FK_506ad1dd3350fb6f731e459db83"`);
+        await queryRunner.query(`ALTER TABLE "attendance_records" DROP CONSTRAINT "FK_3e24aad29f272e2606de0462420"`);
+        await queryRunner.query(`ALTER TABLE "announcements" DROP CONSTRAINT "FK_6179703bdd7f950ba34c0c4d5f2"`);
+        await queryRunner.query(`ALTER TABLE "departments" DROP CONSTRAINT "FK_69025af2ac3cdaa692608056ed9"`);
+        await queryRunner.query(`ALTER TABLE "department_assignments" DROP CONSTRAINT "FK_a027d9ecf8af2b17f5f0b0d8885"`);
+        await queryRunner.query(`ALTER TABLE "department_assignments" DROP CONSTRAINT "FK_81fa58b3c08f5d2c259df763be4"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_68bb5bdec278c3af08ad6a2756"`);
+        await queryRunner.query(`DROP TABLE "employee_status_history"`);
+        await queryRunner.query(`DROP TYPE "public"."employee_status_history_tostatus_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."employee_status_history_fromstatus_enum"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_6086c8dafbae729a930c04d865"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_16f7d1a4b2676ca48c6c1a7b0e"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_9a16d2c86252529f622fa53f1e"`);
+        await queryRunner.query(`DROP TABLE "tasks"`);
+        await queryRunner.query(`DROP TYPE "public"."tasks_status_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."tasks_priority_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."tasks_type_enum"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_0391ab9579160d9ac073730a61"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_9e280c054a0c8dfa99af54824a"`);
+        await queryRunner.query(`DROP TABLE "payroll_records"`);
+        await queryRunner.query(`DROP TYPE "public"."payroll_records_status_enum"`);
+        await queryRunner.query(`DROP TABLE "organization_settings"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_31f1173cfe2bf43c86aeaad50c"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_557e0c8c5a7a1a449723de7682"`);
+        await queryRunner.query(`DROP TABLE "point_transactions"`);
+        await queryRunner.query(`DROP TYPE "public"."point_transactions_source_enum"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_4469d4d7eae7931b1666767e38"`);
+        await queryRunner.query(`DROP TABLE "monthly_kpi_summaries"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_1c04d56e8833eb6827f104f17e"`);
+        await queryRunner.query(`DROP TABLE "calendar_days"`);
+        await queryRunner.query(`DROP TYPE "public"."calendar_days_type_enum"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_9fb6ef15f899489af7e47b6c83"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_506ad1dd3350fb6f731e459db8"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_3e24aad29f272e2606de046242"`);
+        await queryRunner.query(`DROP TABLE "attendance_records"`);
+        await queryRunner.query(`DROP TYPE "public"."attendance_records_status_enum"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_6179703bdd7f950ba34c0c4d5f"`);
+        await queryRunner.query(`DROP TABLE "announcements"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_91fddbe23e927e1e525c152baa"`);
+        await queryRunner.query(`DROP TABLE "departments"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_74e519e60af2fcc10faa6d19a5"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_2d443082eccd5198f95f2a36e2"`);
+        await queryRunner.query(`DROP TABLE "users"`);
+        await queryRunner.query(`DROP TYPE "public"."users_status_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."users_role_enum"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_32511e2c440c57a71b62216933"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_a027d9ecf8af2b17f5f0b0d888"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_81fa58b3c08f5d2c259df763be"`);
+        await queryRunner.query(`DROP TABLE "department_assignments"`);
+    }
+
+}
