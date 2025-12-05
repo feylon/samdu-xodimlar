@@ -1,0 +1,147 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hrms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hrms}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hrms_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-hrms}
+      TZ: ${TZ:-Asia/Tashkent}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hrms} -d ${POSTGRES_DB:-hrms}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - hrms
+
+  mongo:
+    image: mongo:7
+    container_name: hrms-mongo
+    restart: unless-stopped
+    command: ["mongod", "--quiet", "--logpath", "/dev/null"]
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - hrms
+
+  backend:
+    build:
+      context: ./backend
+    container_name: hrms-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      TZ: ${TZ:-Asia/Tashkent}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-hrms}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hrms_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-hrms}
+      MONGO_URI: mongodb://mongo:27017/${MONGO_DB:-hrms}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-900}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-2592000}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3002}
+      FILE_SERVICE_URL: http://file-service:3001
+      FILE_SERVICE_PUBLIC_URL: ${FILE_SERVICE_PUBLIC_URL:-http://localhost:3001}
+      REPORT_REMINDER_HOUR: ${REPORT_REMINDER_HOUR:-17}
+      SEED_SUPERADMIN_LOGIN: ${SEED_SUPERADMIN_LOGIN:-superadmin01}
+      SEED_SUPERADMIN_PASSWORD: ${SEED_SUPERADMIN_PASSWORD:-superadmin01}
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - hrms
+
+  file-service:
+    build:
+      context: ./file-service
+    container_name: hrms-file-service
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      TZ: ${TZ:-Asia/Tashkent}
+      MONGO_URI: mongodb://mongo:27017/${MONGO_FILES_DB:-hrms_files}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3002}
+      STORAGE_DRIVER: ${STORAGE_DRIVER:-local}
+      LOCAL_STORAGE_PATH: /data/uploads
+      PUBLIC_BASE_URL: ${FILE_SERVICE_PUBLIC_URL:-http://localhost:3001}
+      MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-10}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_REGION: ${S3_REGION:-}
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+      S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-false}
+    volumes:
+      - file_uploads:/data/uploads
+    ports:
+      - "${FILE_SERVICE_PORT:-3001}:3001"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - hrms
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: hrms-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+      file-service:
+        condition: service_healthy
+    environment:
+      NITRO_PORT: 3002
+      NITRO_HOST: 0.0.0.0
+      NUXT_PUBLIC_API_BASE: ${PUBLIC_API_BASE:-http://localhost:3000/api}
+      NUXT_PUBLIC_WS_BASE: ${PUBLIC_WS_BASE:-http://localhost:3000}
+      NUXT_PUBLIC_FILE_BASE: ${FILE_SERVICE_PUBLIC_URL:-http://localhost:3001}
+    ports:
+      - "${FRONTEND_PORT:-3002}:3002"
+    networks:
+      - hrms
+
+volumes:
+  postgres_data:
+  mongo_data:
+  file_uploads:
+
+networks:
+  hrms:
+    driver: bridge
