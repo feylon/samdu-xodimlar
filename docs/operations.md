@@ -42,7 +42,7 @@ Yaratilgan hisobda `mustChangePassword = true`; loginni va vaqtinchalik parolni 
   "phone": "+998901112233",
   "position": "Backend dasturchi",
   "baseSalary": 8000000,
-  "hireDate": "2026-10-01",
+  "hireDate": "2025-10-01",
   "assignments": [{ "departmentId": "<DEV id>", "rate": 100 }]
 }
 ```
@@ -87,16 +87,16 @@ Davomat faqat bugungi kun uchun kiritiladi. Kechagi davomat kiritilmagan bo'lsa,
 ```json
 POST calendar/days/bulk
 { "days": [
-  { "date": "2026-01-01", "type": "HOLIDAY", "title": "Yangi yil" },
-  { "date": "2026-03-08", "type": "HOLIDAY", "title": "Xotin-qizlar kuni" },
-  { "date": "2026-03-21", "type": "HOLIDAY", "title": "Navro'z" },
-  { "date": "2026-03-14", "type": "WORKING", "title": "Ko'chirilgan ish kuni" },
-  { "date": "2026-03-23", "type": "NON_WORKING", "title": "Ko'chirilgan dam olish" }
+  { "date": "2025-01-01", "type": "HOLIDAY", "title": "Yangi yil" },
+  { "date": "2025-03-08", "type": "HOLIDAY", "title": "Xotin-qizlar kuni" },
+  { "date": "2025-03-21", "type": "HOLIDAY", "title": "Navro'z" },
+  { "date": "2025-03-14", "type": "WORKING", "title": "Ko'chirilgan ish kuni" },
+  { "date": "2025-03-23", "type": "NON_WORKING", "title": "Ko'chirilgan dam olish" }
 ] }
 ```
 
 - `HOLIDAY`, `NON_WORKING`, `WEEKEND` - ish kuni emas; `WORKING` - shanba/yakshanbani ish kuni qilish uchun.
-- `DELETE calendar/days/2026-03-14` override ni olib tashlaydi (standart qoidaga qaytadi).
+- `DELETE calendar/days/2025-03-14` override ni olib tashlaydi (standart qoidaga qaytadi).
 - Ish kunlari soni payroll (`workingDays`), davomat xulosasi va hisobot eslatmasi (`isWorkingDay`) ga ta'sir qiladi. Yil boshida yoki hukumat qarori chiqishi bilan kiriting - payroll hisoblangandan keyin kalendar o'zgarsa, `CALCULATED` yozuvlarni qayta hisoblash kerak.
 
 ## 4. Oylik ish haqi sikli (HR)
@@ -104,20 +104,20 @@ POST calendar/days/bulk
 Oy tugagach, masalan noyabrning 1-3 kunlarida oktyabr uchun:
 
 1. **Tekshirish**
-   - `GET attendance?from=2026-10-01&to=2026-10-31&status=ABSENT` - shubhali yo'qliklar.
+   - `GET attendance?from=2025-10-01&to=2025-10-31&status=ABSENT` - shubhali yo'qliklar.
    - `GET reports/daily?from=...&to=...&unratedOnly=true` - baholanmagan hisobotlar (baholanmagan hisobot ball bermaydi). Boshliqlarga eslatma yuboring.
    - `GET tasks?status=COMPLETED` va `PARTIALLY_COMPLETED` - tasdiqlanmagan vazifalar (ball faqat `VERIFIED` da).
-   - Kalendar: oktyabr bayramlari kiritilganmi (`GET calendar?year=2026&month=10`).
+   - Kalendar: oktyabr bayramlari kiritilganmi (`GET calendar?year=2025&month=10`).
    - Yangi xodimlar `hireDate`, ketganlar `TERMINATED` (ular hisobga kirmaydi).
-2. **KPI snapshot** - 1-kun 00:05 da avtomatik. Kech kiritilgan ball/baho bo'lsa qo'lda yangilash: `POST kpi/snapshot?year=2026&month=10` (upsert, xavfsiz).
+2. **KPI snapshot** - 1-kun 00:05 da avtomatik. Kech kiritilgan ball/baho bo'lsa qo'lda yangilash: `POST kpi/snapshot?year=2025&month=10` (upsert, xavfsiz).
 3. **Hisoblash**: `/payroll` -> "Hisoblash" (`POST payroll/calculate`):
 
 ```json
-{ "year": 2026, "month": 10 }
+{ "year": 2025, "month": 10 }
 ```
 
    Ixtiyoriy `departmentId` yoki `userIds` bilan qismlarga bo'lib. Javob: `{ calculated, skippedPaid, records[] }`. Har xodimga `PAYROLL_STATUS` bildirishnomasi ketadi ("Ish haqi hisoblandi").
-4. **Ko'rib chiqish**: `GET payroll?year=2026&month=10` - `breakdown` dagi `presentDays/workingDays`, `taskPoints`, `reportPoints`, `teamPerformanceRatio` ni tekshiring. Xato bo'lsa manbani to'g'rilang (davomat faqat bugun uchun, shuning uchun o'tgan oy yo'qligi `kpi/adjust` orqali ball bilan kompensatsiya qilinishi mumkin) va qayta `calculate` - `CALCULATED` yozuvlar qayta yoziladi, `PAID` lar o'tkazib yuboriladi.
+4. **Ko'rib chiqish**: `GET payroll?year=2025&month=10` - `breakdown` dagi `presentDays/workingDays`, `taskPoints`, `reportPoints`, `teamPerformanceRatio` ni tekshiring. Xato bo'lsa manbani to'g'rilang (davomat faqat bugun uchun, shuning uchun o'tgan oy yo'qligi `kpi/adjust` orqali ball bilan kompensatsiya qilinishi mumkin) va qayta `calculate` - `CALCULATED` yozuvlar qayta yoziladi, `PAID` lar o'tkazib yuboriladi.
 5. **To'lov**: har yozuv uchun `PATCH payroll/:id/status { "status": "PAID", "note": "To'lov varaqasi 123" }`. Xodimga "Ish haqi to'landi" bildirishnomasi. `PAID` yozuv o'zgarmas (`PAYROLL_IMMUTABLE_PAID`); xato bo'lsa keyingi oyda `kpi/adjust` yoki alohida hujjat bilan to'g'rilanadi.
 6. **Eksport**: `/payroll` jadvalidan Excel/PDF (6-bo'lim) - buxgalteriya uchun.
 
@@ -181,7 +181,7 @@ docker compose exec mongo mongosh hrms --eval 'db.sessions.updateMany({ revokedA
 
 | Savol | So'rov |
 |---|---|
-| Xodim X nima qilgan | `GET audit/logs?userId=<id>&from=2026-10-01&to=2026-10-07` |
+| Xodim X nima qilgan | `GET audit/logs?userId=<id>&from=2025-10-01&to=2025-10-07` |
 | Kim payroll ni PAID qildi | `GET audit/logs?action=Payroll.updateStatus` |
 | Xodim Y ning holatini kim o'zgartirdi | `GET audit/logs?entity=Employees&entityId=<Y id>&method=PATCH` |
 | Xatolar | `GET audit/logs?onlyErrors=true` |
@@ -196,7 +196,7 @@ Har bir jadvalda (xodimlar, davomat, vazifalar, KPI, ish haqi, audit) "Excel" va
 
 ```json
 {
-  "title": "Ish haqi 2026-10",
+  "title": "Ish haqi 2025-10",
   "subtitle": "Bo'lim: DEV",
   "columns": [
     { "key": "fullName", "label": "F.I.Sh." },
@@ -204,7 +204,7 @@ Har bir jadvalda (xodimlar, davomat, vazifalar, KPI, ish haqi, audit) "Excel" va
     { "key": "status", "label": "Holat" },
     { "key": "paidAt", "label": "To'langan", "type": "datetime" }
   ],
-  "rows": [ { "fullName": "Ergashev J.", "totalAmount": 8120000, "status": "PAID", "paidAt": "2026-11-05T09:12:00Z" } ],
+  "rows": [ { "fullName": "Ergashev J.", "totalAmount": 8120000, "status": "PAID", "paidAt": "2025-11-05T09:12:00Z" } ],
   "locale": "uz",
   "orientation": "landscape"
 }

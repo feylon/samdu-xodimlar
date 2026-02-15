@@ -19,10 +19,10 @@
 
 ### Token muddatlari
 
-| Token | Env | Standart | Payload |
-|---|---|---|---|
-| Access | `JWT_ACCESS_TTL` | 900 s (15 daqiqa) | `{ sub: userId, role, sid: sessionId, type: 'access' }`, HS256, `JWT_ACCESS_SECRET` |
-| Refresh | `JWT_REFRESH_TTL` | 2 592 000 s (30 kun) | `{ sub: userId, sid: sessionId, type: 'refresh' }`, HS256, `JWT_REFRESH_SECRET` |
+| Token   | Env               | Standart             | Payload                                                                             |
+| ------- | ----------------- | -------------------- | ----------------------------------------------------------------------------------- |
+| Access  | `JWT_ACCESS_TTL`  | 900 s (15 daqiqa)    | `{ sub: userId, role, sid: sessionId, type: 'access' }`, HS256, `JWT_ACCESS_SECRET` |
+| Refresh | `JWT_REFRESH_TTL` | 2 592 000 s (30 kun) | `{ sub: userId, sid: sessionId, type: 'refresh' }`, HS256, `JWT_REFRESH_SECRET`     |
 
 Login javobida `accessExpiresIn` va `refreshExpiresIn` (soniya) qaytadi. Sessiya `expiresAt` har refresh da `now + JWT_REFRESH_TTL` ga uzaytiriladi (sliding session). MongoDB TTL indeksi (`expiresAt`, `expireAfterSeconds: 0`) muddati o'tgan sessiya hujjatlarini o'chiradi.
 
@@ -36,15 +36,15 @@ Bitta login = bitta `sessions` hujjati (`sessionId` uuid). Saqlanadi: `client` (
 
 Sessiyalar qachon bekor qilinadi:
 
-| Hodisa | Qamrov | `revokedReason` | Socket event |
-|---|---|---|---|
-| Logout | joriy sessiya | `LOGOUT` | - |
-| Refresh token qayta ishlatilishi | shu sessiya | `REFRESH_TOKEN_REUSE` | - |
-| Foydalanuvchi parolini o'zgartirdi | joriydan tashqari barcha | `PASSWORD_CHANGED` | `session.terminated` har biriga |
-| Foydalanuvchi bitta sessiyani yakunladi | tanlangan | `TERMINATED_BY_USER` | `session.terminated` |
-| Foydalanuvchi "boshqalarini yakunlash" | joriydan tashqari barcha | `TERMINATED_BY_USER` | `session.terminated` |
-| SUPERADMIN login/parolni tikladi (`terminateSessions !== false`) | barcha | `CREDENTIALS_RESET_BY_ADMIN` | `session.terminated` |
-| Holat `TERMINATED` yoki `BLOCKED` | barcha | `STATUS_TERMINATED` / `STATUS_BLOCKED` | `session.terminated` |
+| Hodisa                                                           | Qamrov                   | `revokedReason`                        | Socket event                    |
+| ---------------------------------------------------------------- | ------------------------ | -------------------------------------- | ------------------------------- |
+| Logout                                                           | joriy sessiya            | `LOGOUT`                               | -                               |
+| Refresh token qayta ishlatilishi                                 | shu sessiya              | `REFRESH_TOKEN_REUSE`                  | -                               |
+| Foydalanuvchi parolini o'zgartirdi                               | joriydan tashqari barcha | `PASSWORD_CHANGED`                     | `session.terminated` har biriga |
+| Foydalanuvchi bitta sessiyani yakunladi                          | tanlangan                | `TERMINATED_BY_USER`                   | `session.terminated`            |
+| Foydalanuvchi "boshqalarini yakunlash"                           | joriydan tashqari barcha | `TERMINATED_BY_USER`                   | `session.terminated`            |
+| SUPERADMIN login/parolni tikladi (`terminateSessions !== false`) | barcha                   | `CREDENTIALS_RESET_BY_ADMIN`           | `session.terminated`            |
+| Holat `TERMINATED` yoki `BLOCKED`                                | barcha                   | `STATUS_TERMINATED` / `STATUS_BLOCKED` | `session.terminated`            |
 
 Foydalanuvchi o'z sessiyalarini `GET /api/auth/sessions` (mobil: `/api/mobile/sessions`) orqali ko'radi, `isCurrent` belgisi bilan. SUPERADMIN hammasini `GET /api/audit/sessions?userId=&client=` orqali ko'radi (bekor qilish endpointi SUPERADMIN uchun yo'q; `PATCH /api/users/:id/credentials` barcha sessiyalarni bekor qiladi).
 
@@ -69,15 +69,15 @@ Foydalanuvchi notanish qurilmadan kirishni ko'rsa: `Xavfsizlik` sahifasida o'sha
 
 ## Parol qoidalari
 
-| Qoida | Qayerda |
-|---|---|
-| Hash: Argon2id, `memoryCost 19456`, `timeCost 2`, `parallelism 1` | `common/utils/password.util.ts` |
-| Yangi parol 8-128 belgi (xodim/HR yaratish, admin tiklash, o'z parolini almashtirish) | DTO lar |
-| Login paytida parol 6-128 belgi (eski, qisqa parollarni kiritishga ruxsat, lekin yaratishda emas) | `LoginDto` |
-| Joriy parol tekshiriladi, keyin yangisi o'rnatiladi | `AuthService.changePassword` |
-| `passwordHash` javoblarda hech qachon qaytmaydi (`select: false`) | `User` entity |
-| `mustChangePassword` HR va xodim yaratilganda va admin tiklashda (standart) `true`; o'z parolini almashtirganda `false` | `UsersService` |
-| Hech kim boshqaning parolini bilmaydi: SUPERADMIN yangi parol o'rnatadi (`PATCH /api/users/:id/credentials`), eski parolni ko'rmaydi | - |
+| Qoida                                                                                                                                | Qayerda                         |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------- |
+| Hash: Argon2id, `memoryCost 19456`, `timeCost 2`, `parallelism 1`                                                                    | `common/utils/password.util.ts` |
+| Yangi parol 8-128 belgi (xodim/HR yaratish, admin tiklash, o'z parolini almashtirish)                                                | DTO lar                         |
+| Login paytida parol 6-128 belgi (eski, qisqa parollarni kiritishga ruxsat, lekin yaratishda emas)                                    | `LoginDto`                      |
+| Joriy parol tekshiriladi, keyin yangisi o'rnatiladi                                                                                  | `AuthService.changePassword`    |
+| `passwordHash` javoblarda hech qachon qaytmaydi (`select: false`)                                                                    | `User` entity                   |
+| `mustChangePassword` HR va xodim yaratilganda va admin tiklashda (standart) `true`; o'z parolini almashtirganda `false`              | `UsersService`                  |
+| Hech kim boshqaning parolini bilmaydi: SUPERADMIN yangi parol o'rnatadi (`PATCH /api/users/:id/credentials`), eski parolni ko'rmaydi | -                               |
 
 `mustChangePassword` backend tomonida majburlanmaydi (guard yo'q); bu frontend uchun belgi - login javobidagi `user.mustChangePassword` `true` bo'lsa, frontend foydalanuvchini parol almashtirish oynasiga yo'naltiradi. Murakkablik qoidasi (katta harf, raqam) yo'q; kerak bo'lsa DTO ga `@Matches` qo'shish kerak.
 
@@ -98,11 +98,11 @@ File-service da o'z guard'lari: `JwtAuthGuard` (faqat imzo va payload tekshiruvi
 
 ## Helmet va CORS
 
-| | Backend | File-service |
-|---|---|---|
-| helmet | `helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } })` (CSP standart) | `crossOriginResourcePolicy: cross-origin`, qattiq CSP (`defaultSrc 'self'`, `imgSrc 'self' data: blob:`, `frameAncestors 'none'`), `x-powered-by` o'chirilgan |
-| CORS | `origin: CORS_ORIGINS` (vergul bilan ro'yxat), `credentials: true` | `origin: CORS_ORIGINS`, `methods GET, POST, DELETE, OPTIONS`, `allowedHeaders Authorization, Content-Type`, `exposedHeaders Content-Disposition, Content-Length`, `maxAge 600` |
-| trust proxy | yoqilgan | yoqilgan |
+|             | Backend                                                                            | File-service                                                                                                                                                                   |
+| ----------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| helmet      | `helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } })` (CSP standart) | `crossOriginResourcePolicy: cross-origin`, qattiq CSP (`defaultSrc 'self'`, `imgSrc 'self' data: blob:`, `frameAncestors 'none'`), `x-powered-by` o'chirilgan                  |
+| CORS        | `origin: CORS_ORIGINS` (vergul bilan ro'yxat), `credentials: true`                 | `origin: CORS_ORIGINS`, `methods GET, POST, DELETE, OPTIONS`, `allowedHeaders Authorization, Content-Type`, `exposedHeaders Content-Disposition, Content-Length`, `maxAge 600` |
+| trust proxy | yoqilgan                                                                           | yoqilgan                                                                                                                                                                       |
 
 Socket.IO gateway (`/ws`) CORS ro'yxatini HTTP bilan bir xil `CORS_ORIGINS` o'zgaruvchisidan oladi. Ulanishda JWT imzosi tekshiriladi va sessiya MongoDB da faol ekani (`revokedAt` bo'sh, muddati o'tmagan) tasdiqlanadi; bekor qilingan sessiya tokeni bilan ulanish darhol uziladi.
 
@@ -117,19 +117,19 @@ Guard dan o'tmagan so'rovlar (401/403 guard darajasida) interceptor ga yetib kel
 SUPERADMIN uchun:
 
 ```text
-GET /api/audit/logs?userId=<uuid>&action=Tasks.verify&entity=Employees&entityId=&method=PATCH&from=2026-10-01&to=2026-10-31&onlyErrors=true&page=1&limit=50
+GET /api/audit/logs?userId=<uuid>&action=Tasks.verify&entity=Employees&entityId=&method=PATCH&from=2025-10-01&to=2025-10-31&onlyErrors=true&page=1&limit=50
 GET /api/audit/login-history?userId=&login=&success=false
 GET /api/audit/sessions?userId=&client=MOBILE
 ```
 
 ## Fayl ruxsatlari (file-service)
 
-| Kategoriya | Yuklash | O'qish (`GET /files/:id`, `/files/:id/content`) | Cache-Control |
-|---|---|---|---|
-| `PHOTO` | SUPERADMIN, HR | ochiq (tokensiz) | `public, max-age=86400` |
-| `LOGO` | SUPERADMIN | ochiq | `public, max-age=86400` |
-| `PASSPORT` | SUPERADMIN, HR | SUPERADMIN, HR, `ownerUserId` egasi, yuklagan | `private, no-store` |
-| `DOCUMENT` | barcha rollar | SUPERADMIN, HR, `ownerUserId` egasi, yuklagan | `private, no-store` |
+| Kategoriya | Yuklash        | O'qish (`GET /files/:id`, `/files/:id/content`) | Cache-Control           |
+| ---------- | -------------- | ----------------------------------------------- | ----------------------- |
+| `PHOTO`    | SUPERADMIN, HR | ochiq (tokensiz)                                | `public, max-age=86400` |
+| `LOGO`     | SUPERADMIN     | ochiq                                           | `public, max-age=86400` |
+| `PASSPORT` | SUPERADMIN, HR | SUPERADMIN, HR, `ownerUserId` egasi, yuklagan   | `private, no-store`     |
+| `DOCUMENT` | barcha rollar  | SUPERADMIN, HR, `ownerUserId` egasi, yuklagan   | `private, no-store`     |
 
 - Token `Authorization: Bearer` yoki `?token=<accessToken>` query orqali (brauzer `<img>`/`<a>` teglari uchun). Query dagi token proxy/brauzer loglarida qolishi mumkin - access token qisqa muddatli (15 daqiqa) bo'lgani uchun xavf cheklangan, lekin faqat kerak bo'lganda ishlating.
 - MIME ro'yxati: PHOTO `image/jpeg, image/png, image/webp`; LOGO + `image/svg+xml`; PASSPORT raster + `application/pdf`; DOCUMENT raster + PDF + DOCX + XLSX + `text/plain`. Mos kelmasa `400 FILE_TYPE_NOT_ALLOWED`.

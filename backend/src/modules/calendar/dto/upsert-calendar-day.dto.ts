@@ -4,7 +4,7 @@ import { ArrayMaxSize, IsArray, IsEnum, IsOptional, IsString, Matches, MaxLength
 import { CalendarDayType } from '../../../common/enums';
 
 export class UpsertCalendarDayDto {
-  @ApiProperty({ example: '2026-03-08' })
+  @ApiProperty({ example: '2025-03-08' })
   @Matches(/^\d{4}-\d{2}-\d{2}$/)
   date: string;
 

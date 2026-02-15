@@ -19,12 +19,12 @@ export class ChangeStatusDto {
   @MaxLength(1000)
   medicalReason?: string;
 
-  @ApiPropertyOptional({ example: '2026-01-10' })
+  @ApiPropertyOptional({ example: '2025-01-10' })
   @IsOptional()
   @IsDateString()
   startDate?: string;
 
-  @ApiPropertyOptional({ example: '2026-01-24' })
+  @ApiPropertyOptional({ example: '2025-01-24' })
   @IsOptional()
   @IsDateString()
   endDate?: string;

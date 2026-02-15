@@ -14,12 +14,12 @@ export class ReportQueryDto extends PaginationDto {
   @IsUUID()
   userId?: string;
 
-  @ApiPropertyOptional({ example: '2026-02-01' })
+  @ApiPropertyOptional({ example: '2025-02-01' })
   @IsOptional()
   @Matches(/^\d{4}-\d{2}-\d{2}$/)
   from?: string;
 
-  @ApiPropertyOptional({ example: '2026-02-28' })
+  @ApiPropertyOptional({ example: '2025-02-28' })
   @IsOptional()
   @Matches(/^\d{4}-\d{2}-\d{2}$/)
   to?: string;

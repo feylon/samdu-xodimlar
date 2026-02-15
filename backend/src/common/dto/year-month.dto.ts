@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { IsInt, IsOptional, Max, Min } from 'class-validator';
 
 export class YearMonthDto {
-  @ApiPropertyOptional({ example: 2026 })
+  @ApiPropertyOptional({ example: 2025 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

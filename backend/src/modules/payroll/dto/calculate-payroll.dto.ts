@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { ArrayMaxSize, IsArray, IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
 
 export class CalculatePayrollDto {
-  @ApiProperty({ example: 2026 })
+  @ApiProperty({ example: 2025 })
   @Type(() => Number)
   @IsInt()
   @Min(2000)

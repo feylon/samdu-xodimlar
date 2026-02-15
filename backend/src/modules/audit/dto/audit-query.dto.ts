@@ -32,12 +32,12 @@ export class AuditQueryDto extends PaginationDto {
   @IsIn(['POST', 'PUT', 'PATCH', 'DELETE'])
   method?: string;
 
-  @ApiPropertyOptional({ example: '2026-01-01' })
+  @ApiPropertyOptional({ example: '2025-01-01' })
   @IsOptional()
   @Matches(/^\d{4}-\d{2}-\d{2}$/)
   from?: string;
 
-  @ApiPropertyOptional({ example: '2026-01-31' })
+  @ApiPropertyOptional({ example: '2025-01-31' })
   @IsOptional()
   @Matches(/^\d{4}-\d{2}-\d{2}$/)
   to?: string;

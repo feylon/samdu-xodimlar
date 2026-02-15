@@ -6,19 +6,19 @@ Asosiy URL: `NUXT_PUBLIC_API_BASE` ga mos, masalan `https://hrms.example.uz/api`
 
 ## Endpointlar
 
-| Metod | Yo'l | Auth | Tavsif |
-|---|---|---|---|
-| POST | `/mobile/auth/login` | yo'q (10/min IP) | Login + qurilma ro'yxati (`deviceName`, `platform`, `pushToken`) |
-| POST | `/mobile/auth/refresh` | yo'q | Refresh token rotation |
-| POST | `/mobile/auth/logout` | Bearer | Joriy sessiyani yakunlash |
-| POST | `/mobile/auth/change-password` | Bearer | Parolni almashtirish (boshqa sessiyalar yopiladi) |
-| GET | `/mobile/me` | Bearer | Profil + faol yuklamalar + `sessionId` |
-| GET | `/mobile/sessions` | Bearer | Barcha faol sessiyalar (web va mobil), `isCurrent` bilan |
-| DELETE | `/mobile/sessions/:sessionId` | Bearer | Bitta sessiyani yakunlash |
-| DELETE | `/mobile/sessions/others` | Bearer | Joriydan tashqari hammasini yakunlash |
-| GET | `/mobile/login-history?page=&limit=` | Bearer | O'z login tarixi |
-| GET | `/mobile/dashboard` | Bearer | Rolga mos dashboard (web `GET /dashboard` bilan bir xil payload) |
-| GET | `/mobile/notifications?unreadOnly=&page=&limit=` | Bearer | Bildirishnomalar lentasi |
+| Metod  | Yo'l                                             | Auth             | Tavsif                                                           |
+| ------ | ------------------------------------------------ | ---------------- | ---------------------------------------------------------------- |
+| POST   | `/mobile/auth/login`                             | yo'q (10/min IP) | Login + qurilma ro'yxati (`deviceName`, `platform`, `pushToken`) |
+| POST   | `/mobile/auth/refresh`                           | yo'q             | Refresh token rotation                                           |
+| POST   | `/mobile/auth/logout`                            | Bearer           | Joriy sessiyani yakunlash                                        |
+| POST   | `/mobile/auth/change-password`                   | Bearer           | Parolni almashtirish (boshqa sessiyalar yopiladi)                |
+| GET    | `/mobile/me`                                     | Bearer           | Profil + faol yuklamalar + `sessionId`                           |
+| GET    | `/mobile/sessions`                               | Bearer           | Barcha faol sessiyalar (web va mobil), `isCurrent` bilan         |
+| DELETE | `/mobile/sessions/:sessionId`                    | Bearer           | Bitta sessiyani yakunlash                                        |
+| DELETE | `/mobile/sessions/others`                        | Bearer           | Joriydan tashqari hammasini yakunlash                            |
+| GET    | `/mobile/login-history?page=&limit=`             | Bearer           | O'z login tarixi                                                 |
+| GET    | `/mobile/dashboard`                              | Bearer           | Rolga mos dashboard (web `GET /dashboard` bilan bir xil payload) |
+| GET    | `/mobile/notifications?unreadOnly=&page=&limit=` | Bearer           | Bildirishnomalar lentasi                                         |
 
 Bildirishnomani o'qilgan deb belgilash umumiy endpointlar orqali: `PATCH /api/notifications/:id/read`, `POST /api/notifications/read-all`, `GET /api/notifications/unread-count`.
 
@@ -101,10 +101,21 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ```json
 {
-  "id": "a3f0...", "login": "j.ergashev", "role": "EMPLOYEE", "fullName": "Ergashev Jamshid",
+  "id": "a3f0...",
+  "login": "j.ergashev",
+  "role": "EMPLOYEE",
+  "fullName": "Ergashev Jamshid",
   "...": "PublicUser maydonlari",
   "assignments": [
-    { "id": "c1...", "departmentId": "d9...", "departmentName": "Dasturlash", "departmentCode": "DEV", "rate": 100, "startDate": "2025-10-01", "isHead": false }
+    {
+      "id": "c1...",
+      "departmentId": "d9...",
+      "departmentName": "Dasturlash",
+      "departmentCode": "DEV",
+      "rate": 100,
+      "startDate": "2025-10-01",
+      "isHead": false
+    }
   ],
   "sessionId": "5f1c0a1e-7b0f-4a5e-9c3d-2f8e6b1a9d10"
 }
@@ -121,15 +132,31 @@ GET /api/mobile/sessions
 ```json
 [
   {
-    "id": "5f1c0a1e-...", "userId": "a3f0...", "client": "MOBILE",
-    "ip": "84.54.x.x", "userAgent": "okhttp/4.12.0", "device": "desktop", "browser": "unknown", "os": "unknown",
-    "deviceName": "Samsung Galaxy S24", "platform": "android",
-    "createdAt": "2025-10-07T04:12:30.000Z", "lastActiveAt": "2026-10-07T05:01:10.000Z", "expiresAt": "2026-11-06T05:01:10.000Z",
+    "id": "5f1c0a1e-...",
+    "userId": "a3f0...",
+    "client": "MOBILE",
+    "ip": "84.54.x.x",
+    "userAgent": "okhttp/4.12.0",
+    "device": "desktop",
+    "browser": "unknown",
+    "os": "unknown",
+    "deviceName": "Samsung Galaxy S24",
+    "platform": "android",
+    "createdAt": "2025-10-07T04:12:30.000Z",
+    "lastActiveAt": "2025-10-07T05:01:10.000Z",
+    "expiresAt": "2025-11-06T05:01:10.000Z",
     "isCurrent": true
   },
   {
-    "id": "0d7e...", "client": "WEB", "device": "desktop", "browser": "Chrome 130.0", "os": "Windows 10",
-    "deviceName": null, "platform": null, "isCurrent": false, "...": "..."
+    "id": "0d7e...",
+    "client": "WEB",
+    "device": "desktop",
+    "browser": "Chrome 130.0",
+    "os": "Windows 10",
+    "deviceName": null,
+    "platform": null,
+    "isCurrent": false,
+    "...": "..."
   }
 ]
 ```
@@ -144,7 +171,7 @@ GET /api/mobile/sessions
 POST /api/mobile/auth/change-password
 Authorization: Bearer ...
 
-{ "currentPassword": "Parol-12345", "newPassword": "Yangi-parol-2026" }
+{ "currentPassword": "Parol-12345", "newPassword": "Yangi-parol-2025" }
 ```
 
 `newPassword` 8-128 belgi. Javob `{ "success": true, "terminatedSessions": 1 }`. Joriy sessiya saqlanadi, qolganlari yopiladi; `mustChangePassword` `false` bo'ladi. Joriy parol noto'g'ri -> `400 AUTH_PASSWORD_MISMATCH`.
@@ -164,14 +191,51 @@ EMPLOYEE uchun:
 ```json
 {
   "role": "EMPLOYEE",
-  "period": { "year": 2026, "month": 10 },
-  "points": { "total": 23, "task": 15, "bonusTask": 5, "dailyReport": 3, "manual": 0 },
-  "pointsHistory": [ { "year": 2026, "month": 9, "totalPoints": 41, "tasksVerified": 6, "attendanceRatio": "0.95", "...": "..." } ],
-  "attendance": { "workingDays": 23, "elapsedWorkingDays": 5, "presentDays": 5, "ratio": 1, "counts": { "PRESENT": 4, "LATE": 1, "ABSENT": 0, "EXCUSED": 0, "REMOTE": 0 } },
-  "tasks": { "byStatus": { "ASSIGNED": 2, "IN_PROGRESS": 1, "VERIFIED": 4 }, "overdue": 1 },
+  "period": { "year": 2025, "month": 10 },
+  "points": {
+    "total": 23,
+    "task": 15,
+    "bonusTask": 5,
+    "dailyReport": 3,
+    "manual": 0
+  },
+  "pointsHistory": [
+    {
+      "year": 2025,
+      "month": 9,
+      "totalPoints": 41,
+      "tasksVerified": 6,
+      "attendanceRatio": "0.95",
+      "...": "..."
+    }
+  ],
+  "attendance": {
+    "workingDays": 23,
+    "elapsedWorkingDays": 5,
+    "presentDays": 5,
+    "ratio": 1,
+    "counts": {
+      "PRESENT": 4,
+      "LATE": 1,
+      "ABSENT": 0,
+      "EXCUSED": 0,
+      "REMOTE": 0
+    }
+  },
+  "tasks": {
+    "byStatus": { "ASSIGNED": 2, "IN_PROGRESS": 1, "VERIFIED": 4 },
+    "overdue": 1
+  },
   "reportToday": { "submitted": false },
   "unreadNotifications": 3,
-  "latestPayroll": { "year": 2026, "month": 9, "totalAmount": 8120000, "currency": "UZS", "status": "PAID", "breakdown": { "...": "..." } },
+  "latestPayroll": {
+    "year": 2025,
+    "month": 9,
+    "totalAmount": 8120000,
+    "currency": "UZS",
+    "status": "PAID",
+    "breakdown": { "...": "..." }
+  },
   "activePolls": 1
 }
 ```
@@ -188,13 +252,19 @@ GET /api/mobile/notifications?unreadOnly=true&page=1&limit=20
 {
   "items": [
     {
-      "id": "67...", "userId": "a3f0...", "type": "TASK_ASSIGNED",
-      "title": "Yangi vazifa", "body": "API hujjatini yangilash · muddat 2026-10-10",
+      "id": "67...",
+      "userId": "a3f0...",
+      "type": "TASK_ASSIGNED",
+      "title": "Yangi vazifa",
+      "body": "API hujjatini yangilash · muddat 2025-10-10",
       "data": { "taskId": "b4...", "type": "REGULAR", "priority": "HIGH" },
-      "readAt": null, "createdAt": "2025-10-07T05:30:00.000Z"
+      "readAt": null,
+      "createdAt": "2025-10-07T05:30:00.000Z"
     }
   ],
-  "total": 3, "page": 1, "limit": 20
+  "total": 3,
+  "page": 1,
+  "limit": 20
 }
 ```
 
@@ -203,17 +273,25 @@ GET /api/mobile/notifications?unreadOnly=true&page=1&limit=20
 ## Socket.IO
 
 ```js
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
 const socket = io(`${WS_BASE}/ws`, {
-  auth: { token: accessToken },        // yoki query: { token }, yoki extraHeaders Authorization
-  transports: ['websocket'],
+  auth: { token: accessToken }, // yoki query: { token }, yoki extraHeaders Authorization
+  transports: ["websocket"],
 });
 
-socket.on('notification', (n) => { /* {id, type, title, body, data, readAt, createdAt} */ });
-socket.on('notification.unread', ({ count }) => { /* badge */ });
-socket.on('security.alert', (a) => { /* {kind:'NEW_LOGIN', sessionId, client, ip, device, browser, os, at} */ });
-socket.on('session.terminated', ({ reason }) => { /* tokenlarni o'chirib login ekraniga */ });
+socket.on("notification", (n) => {
+  /* {id, type, title, body, data, readAt, createdAt} */
+});
+socket.on("notification.unread", ({ count }) => {
+  /* badge */
+});
+socket.on("security.alert", (a) => {
+  /* {kind:'NEW_LOGIN', sessionId, client, ip, device, browser, os, at} */
+});
+socket.on("session.terminated", ({ reason }) => {
+  /* tokenlarni o'chirib login ekraniga */
+});
 ```
 
 - Token noto'g'ri yoki yo'q bo'lsa server ulanishni darhol uzadi (`disconnect`).
@@ -225,24 +303,30 @@ socket.on('session.terminated', ({ reason }) => { /* tokenlarni o'chirib login e
 Barcha xatolar bitta formatda:
 
 ```json
-{ "statusCode": 401, "message": "AUTH_SESSION_REVOKED", "details": null, "path": "/api/mobile/me", "timestamp": "2025-10-07T05:40:00.000Z" }
+{
+  "statusCode": 401,
+  "message": "AUTH_SESSION_REVOKED",
+  "details": null,
+  "path": "/api/mobile/me",
+  "timestamp": "2025-10-07T05:40:00.000Z"
+}
 ```
 
 Validatsiya xatosida `message: "VALIDATION_FAILED"` va `details: ["login must be longer than or equal to 3 characters", ...]`.
 
-| HTTP | `message` | Ilova harakati |
-|---|---|---|
-| 401 | `AUTH_INVALID_CREDENTIALS` | Login ekranida "login yoki parol noto'g'ri" |
-| 401 | `AUTH_ACCOUNT_INACTIVE` | Hisob bloklangan/ishdan bo'shatilgan; tokenlarni o'chirish |
-| 401 | `AUTH_SESSION_REVOKED` | Sessiya yopilgan (boshqa qurilmadan, admin, parol o'zgarishi); refresh urinmang, login ekraniga |
-| 401 | `AUTH_REFRESH_INVALID` | Refresh yaroqsiz yoki qayta ishlatilgan; login ekraniga |
-| 401 | `Unauthorized` (passport, token muddati tugagan yoki imzo noto'g'ri) | Refresh qiling, keyin so'rovni takrorlang |
-| 400 | `AUTH_PASSWORD_MISMATCH` | Joriy parol noto'g'ri |
-| 400 | `VALIDATION_FAILED` | `details` ni formaga chiqaring |
-| 403 | `ACCESS_FORBIDDEN_ROLE` / `ACCESS_FORBIDDEN_SCOPE` | Funksiya bu rol/bo'lim uchun yo'q; UI da yashiring |
-| 404 | `*_NOT_FOUND` | Ob'ekt yo'q |
-| 429 | `ThrottlerException: Too Many Requests` | Login: 10/min, umumiy: 300/min; kutib qayta urinish |
-| 409 | `DATABASE_CONSTRAINT_VIOLATION` | Takroriy yozuv |
+| HTTP | `message`                                                            | Ilova harakati                                                                                  |
+| ---- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 401  | `AUTH_INVALID_CREDENTIALS`                                           | Login ekranida "login yoki parol noto'g'ri"                                                     |
+| 401  | `AUTH_ACCOUNT_INACTIVE`                                              | Hisob bloklangan/ishdan bo'shatilgan; tokenlarni o'chirish                                      |
+| 401  | `AUTH_SESSION_REVOKED`                                               | Sessiya yopilgan (boshqa qurilmadan, admin, parol o'zgarishi); refresh urinmang, login ekraniga |
+| 401  | `AUTH_REFRESH_INVALID`                                               | Refresh yaroqsiz yoki qayta ishlatilgan; login ekraniga                                         |
+| 401  | `Unauthorized` (passport, token muddati tugagan yoki imzo noto'g'ri) | Refresh qiling, keyin so'rovni takrorlang                                                       |
+| 400  | `AUTH_PASSWORD_MISMATCH`                                             | Joriy parol noto'g'ri                                                                           |
+| 400  | `VALIDATION_FAILED`                                                  | `details` ni formaga chiqaring                                                                  |
+| 403  | `ACCESS_FORBIDDEN_ROLE` / `ACCESS_FORBIDDEN_SCOPE`                   | Funksiya bu rol/bo'lim uchun yo'q; UI da yashiring                                              |
+| 404  | `*_NOT_FOUND`                                                        | Ob'ekt yo'q                                                                                     |
+| 429  | `ThrottlerException: Too Many Requests`                              | Login: 10/min, umumiy: 300/min; kutib qayta urinish                                             |
+| 409  | `DATABASE_CONSTRAINT_VIOLATION`                                      | Takroriy yozuv                                                                                  |
 
 Tavsiya etilgan interceptor mantiqi:
 

@@ -32,7 +32,7 @@ export class MarkAttendanceDto {
   @MaxLength(500)
   note?: string;
 
-  @ApiPropertyOptional({ description: 'Must equal the current date in Asia/Tashkent; defaults to today', example: '2026-02-10' })
+  @ApiPropertyOptional({ description: 'Must equal the current date in Asia/Tashkent; defaults to today', example: '2025-02-10' })
   @IsOptional()
   @Matches(/^\d{4}-\d{2}-\d{2}$/)
   date?: string;

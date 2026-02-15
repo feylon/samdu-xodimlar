@@ -4,13 +4,13 @@ Manba: `docker-compose.yml` (root). Barcha qiymatlar `.env` dan `${VAR:-default}
 
 ## Xizmatlar
 
-| Xizmat | Konteyner | Image / build | Portlar (host:konteyner) | Volume | Healthcheck | depends_on |
-|---|---|---|---|---|---|---|
-| `postgres` | `hrms-postgres` | `postgres:16-alpine` | `${POSTGRES_PORT:-5432}:5432` | `postgres_data:/var/lib/postgresql/data` | `pg_isready -U $POSTGRES_USER -d $POSTGRES_DB`, 5 s / 20 urinish | - |
-| `mongo` | `hrms-mongo` | `mongo:7`, `mongod --quiet --logpath /dev/null` | `${MONGO_PORT:-27017}:27017` | `mongo_data:/data/db` | `mongosh --quiet --eval "db.adminCommand('ping').ok"`, 5 s / 20 urinish | - |
-| `backend` | `hrms-backend` | `./backend` (Dockerfile, node:22-alpine, multi-stage, `npm run start:prod`) | `${BACKEND_PORT:-3000}:3000` | - | `wget -qO- http://127.0.0.1:3000/api/health`, 10 s / 12 urinish, start_period 30 s | postgres (healthy), mongo (healthy) |
-| `file-service` | `hrms-file-service` | `./file-service` (node:22-alpine, `USER node`, `node dist/main.js`) | `${FILE_SERVICE_PORT:-3001}:3001` | `file_uploads:/data/uploads` | `wget -qO- http://127.0.0.1:3001/health`, 10 s / 12 urinish, start_period 20 s | mongo (healthy) |
-| `frontend` | `hrms-frontend` | `./frontend` (node:22-alpine, `nuxt build`, `node .output/server/index.mjs`) | `${FRONTEND_PORT:-3002}:3002` | - | yo'q | backend (healthy), file-service (healthy) |
+| Xizmat         | Konteyner           | Image / build                                                                | Portlar (host:konteyner)          | Volume                                   | Healthcheck                                                                        | depends_on                                |
+| -------------- | ------------------- | ---------------------------------------------------------------------------- | --------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------- |
+| `postgres`     | `hrms-postgres`     | `postgres:16-alpine`                                                         | `${POSTGRES_PORT:-5432}:5432`     | `postgres_data:/var/lib/postgresql/data` | `pg_isready -U $POSTGRES_USER -d $POSTGRES_DB`, 5 s / 20 urinish                   | -                                         |
+| `mongo`        | `hrms-mongo`        | `mongo:7`, `mongod --quiet --logpath /dev/null`                              | `${MONGO_PORT:-27017}:27017`      | `mongo_data:/data/db`                    | `mongosh --quiet --eval "db.adminCommand('ping').ok"`, 5 s / 20 urinish            | -                                         |
+| `backend`      | `hrms-backend`      | `./backend` (Dockerfile, node:22-alpine, multi-stage, `npm run start:prod`)  | `${BACKEND_PORT:-3000}:3000`      | -                                        | `wget -qO- http://127.0.0.1:3000/api/health`, 10 s / 12 urinish, start_period 30 s | postgres (healthy), mongo (healthy)       |
+| `file-service` | `hrms-file-service` | `./file-service` (node:22-alpine, `USER node`, `node dist/main.js`)          | `${FILE_SERVICE_PORT:-3001}:3001` | `file_uploads:/data/uploads`             | `wget -qO- http://127.0.0.1:3001/health`, 10 s / 12 urinish, start_period 20 s     | mongo (healthy)                           |
+| `frontend`     | `hrms-frontend`     | `./frontend` (node:22-alpine, `nuxt build`, `node .output/server/index.mjs`) | `${FRONTEND_PORT:-3002}:3002`     | -                                        | yo'q                                                                               | backend (healthy), file-service (healthy) |
 
 Tarmoq: `hrms` (bridge). Volume'lar: `postgres_data`, `mongo_data`, `file_uploads`. Barcha xizmatlarda `restart: unless-stopped`.
 
@@ -95,7 +95,7 @@ docker compose exec backend node dist/database/seed.js
 docker compose exec -T postgres pg_dump -U hrms -d hrms -Fc > hrms_$(date +%F).dump
 
 # Restore (bo'sh bazaga)
-docker compose exec -T postgres pg_restore -U hrms -d hrms --clean --if-exists < hrms_2026-10-07.dump
+docker compose exec -T postgres pg_restore -U hrms -d hrms --clean --if-exists < hrms_2025-10-07.dump
 ```
 
 ### MongoDB
@@ -106,7 +106,7 @@ docker compose exec -T mongo mongodump --archive --gzip --db hrms > mongo_hrms_$
 docker compose exec -T mongo mongodump --archive --gzip --db hrms_files > mongo_files_$(date +%F).archive.gz
 
 # Restore
-docker compose exec -T mongo mongorestore --archive --gzip --drop < mongo_hrms_2026-10-07.archive.gz
+docker compose exec -T mongo mongorestore --archive --gzip --drop < mongo_hrms_2025-10-07.archive.gz
 ```
 
 ### Volume'larni to'liq nusxalash (`docker run --rm -v ... tar`)
@@ -134,7 +134,7 @@ docker compose stop
 docker run --rm \
   -v "${PROJECT}_file_uploads":/target \
   -v "$PWD/backups":/backup:ro \
-  alpine sh -c "rm -rf /target/* && tar xzf /backup/file_uploads_2026-10-07.tar.gz -C /target"
+  alpine sh -c "rm -rf /target/* && tar xzf /backup/file_uploads_2025-10-07.tar.gz -C /target"
 docker compose start
 ```
 
@@ -146,12 +146,12 @@ docker compose start
 
 Konteyner portlarini to'g'ridan-to'g'ri internetga ochmang. Nginx / Caddy / Traefik orqali:
 
-| Tashqi yo'l | Ichki manzil | Izoh |
-|---|---|---|
-| `https://hrms.example.uz/` | `frontend:3002` | SPA |
-| `https://hrms.example.uz/api/` | `backend:3000` | REST; `/api/docs` ni production da proxy orqali yopish mumkin |
-| `https://hrms.example.uz/ws/` | `backend:3000` | Socket.IO: `Upgrade`/`Connection` headerlari va `proxy_read_timeout` ni uzaytirish kerak |
-| `https://files.example.uz/` yoki `/files/` | `file-service:3001` | `client_max_body_size` >= `MAX_FILE_SIZE_MB` |
+| Tashqi yo'l                                | Ichki manzil        | Izoh                                                                                     |
+| ------------------------------------------ | ------------------- | ---------------------------------------------------------------------------------------- |
+| `https://hrms.example.uz/`                 | `frontend:3002`     | SPA                                                                                      |
+| `https://hrms.example.uz/api/`             | `backend:3000`      | REST; `/api/docs` ni production da proxy orqali yopish mumkin                            |
+| `https://hrms.example.uz/ws/`              | `backend:3000`      | Socket.IO: `Upgrade`/`Connection` headerlari va `proxy_read_timeout` ni uzaytirish kerak |
+| `https://files.example.uz/` yoki `/files/` | `file-service:3001` | `client_max_body_size` >= `MAX_FILE_SIZE_MB`                                             |
 
 Backend va file-service `app.set('trust proxy', true)` qilgan, shuning uchun `X-Forwarded-For` dagi birinchi IP sessiya va audit yozuvlariga tushadi. Proxy ushbu headerni to'g'ri yuborishi va tashqaridan kelgan `X-Forwarded-For` ni qayta yozishi shart.
 
@@ -196,15 +196,15 @@ Kalit formati: `<category>/<fileId>.<ext>` (masalan `photo/3f2a....jpg`). Mavjud
 
 ## Muammolarni bartaraf etish
 
-| Belgi | Sabab | Yechim |
-|---|---|---|
-| `Bind for 0.0.0.0:3000 failed: port is already allocated` | Port band | `.env` da `BACKEND_PORT` (yoki boshqa `*_PORT`) ni o'zgartiring, `PUBLIC_*` va `CORS_ORIGINS` ni moslang |
-| `hrms-backend` `unhealthy`, `frontend` ishga tushmaydi | Backend `/api/health` javob bermaydi | `docker compose logs backend`; `Missing required environment variable JWT_ACCESS_SECRET` bo'lsa `.env` ni to'ldiring; `postgres: down` bo'lsa Postgres loglarini tekshiring |
-| `Migration failed: ...` va konteyner qayta-qayta restart | Baza sxemasi migratsiya bilan mos emas (qo'lda o'zgartirilgan jadval, yarim bajarilgan migratsiya) | `psql` da `typeorm_migrations` ni ko'ring; har migratsiya o'z tranzaksiyasida (`transaction: 'each'`), shuning uchun yarim holat bo'lmaydi; xato bergan SQL ni tuzatib yangi migratsiya yozing, qo'llangan faylni tahrirlamang ([migrations.md](migrations.md)) |
-| `Seed failed: duplicate key value violates unique constraint "IDX_...users login"` | `SEED_SUPERADMIN_LOGIN` boshqa harf registrida mavjud | Seed `findOne({login})` aniq moslikni qidiradi, baza indeksi esa case-sensitive; login qiymatini mavjud yozuv bilan bir xil yozing |
-| Frontend ochiladi, lekin `Network Error` / CORS | `CORS_ORIGINS` da brauzer origin yo'q yoki `PUBLIC_API_BASE` noto'g'ri | `.env` ni to'g'rilab `docker compose up -d --build backend file-service frontend` |
-| Rasmlar ko'rinmaydi, `401 MISSING_TOKEN` | PASSPORT/DOCUMENT kategoriyasiga tokensiz murojaat | `<img src="...?token=<accessToken>">` yoki `Authorization` header ([security.md](security.md)) |
-| `FILE_CONTENT_NOT_FOUND` | Metadata bor, fayl diskda yo'q (volume o'chirilgan yoki restore qilinmagan) | `file_uploads` ni restore qiling yoki `DELETE /files/:id` bilan metadata ni o'chiring |
-| `429 Too Many Requests` | ThrottlerGuard: 300/min umumiy, 10/min login (IP bo'yicha) | Reverse proxy `X-Forwarded-For` ni to'g'ri uzatayotganini tekshiring, aks holda barcha foydalanuvchilar bitta IP sifatida hisoblanadi |
-| Vaqt/sana bir kun oldinga yoki orqaga suriladi | `TZ` noto'g'ri | `.env` da `TZ=Asia/Tashkent`; backend ni qayta ishga tushiring (APP_TIMEZONE ilova yuklanganda o'qiladi) |
-| `mongosh: not found` healthcheck da | `mongo` image versiyasi eski | `mongo:7` dan foydalaning (mongosh image ichida) |
+| Belgi                                                                              | Sabab                                                                                              | Yechim                                                                                                                                                                                                                                                          |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Bind for 0.0.0.0:3000 failed: port is already allocated`                          | Port band                                                                                          | `.env` da `BACKEND_PORT` (yoki boshqa `*_PORT`) ni o'zgartiring, `PUBLIC_*` va `CORS_ORIGINS` ni moslang                                                                                                                                                        |
+| `hrms-backend` `unhealthy`, `frontend` ishga tushmaydi                             | Backend `/api/health` javob bermaydi                                                               | `docker compose logs backend`; `Missing required environment variable JWT_ACCESS_SECRET` bo'lsa `.env` ni to'ldiring; `postgres: down` bo'lsa Postgres loglarini tekshiring                                                                                     |
+| `Migration failed: ...` va konteyner qayta-qayta restart                           | Baza sxemasi migratsiya bilan mos emas (qo'lda o'zgartirilgan jadval, yarim bajarilgan migratsiya) | `psql` da `typeorm_migrations` ni ko'ring; har migratsiya o'z tranzaksiyasida (`transaction: 'each'`), shuning uchun yarim holat bo'lmaydi; xato bergan SQL ni tuzatib yangi migratsiya yozing, qo'llangan faylni tahrirlamang ([migrations.md](migrations.md)) |
+| `Seed failed: duplicate key value violates unique constraint "IDX_...users login"` | `SEED_SUPERADMIN_LOGIN` boshqa harf registrida mavjud                                              | Seed `findOne({login})` aniq moslikni qidiradi, baza indeksi esa case-sensitive; login qiymatini mavjud yozuv bilan bir xil yozing                                                                                                                              |
+| Frontend ochiladi, lekin `Network Error` / CORS                                    | `CORS_ORIGINS` da brauzer origin yo'q yoki `PUBLIC_API_BASE` noto'g'ri                             | `.env` ni to'g'rilab `docker compose up -d --build backend file-service frontend`                                                                                                                                                                               |
+| Rasmlar ko'rinmaydi, `401 MISSING_TOKEN`                                           | PASSPORT/DOCUMENT kategoriyasiga tokensiz murojaat                                                 | `<img src="...?token=<accessToken>">` yoki `Authorization` header ([security.md](security.md))                                                                                                                                                                  |
+| `FILE_CONTENT_NOT_FOUND`                                                           | Metadata bor, fayl diskda yo'q (volume o'chirilgan yoki restore qilinmagan)                        | `file_uploads` ni restore qiling yoki `DELETE /files/:id` bilan metadata ni o'chiring                                                                                                                                                                           |
+| `429 Too Many Requests`                                                            | ThrottlerGuard: 300/min umumiy, 10/min login (IP bo'yicha)                                         | Reverse proxy `X-Forwarded-For` ni to'g'ri uzatayotganini tekshiring, aks holda barcha foydalanuvchilar bitta IP sifatida hisoblanadi                                                                                                                           |
+| Vaqt/sana bir kun oldinga yoki orqaga suriladi                                     | `TZ` noto'g'ri                                                                                     | `.env` da `TZ=Asia/Tashkent`; backend ni qayta ishga tushiring (APP_TIMEZONE ilova yuklanganda o'qiladi)                                                                                                                                                        |
+| `mongosh: not found` healthcheck da                                                | `mongo` image versiyasi eski                                                                       | `mongo:7` dan foydalaning (mongosh image ichida)                                                                                                                                                                                                                |

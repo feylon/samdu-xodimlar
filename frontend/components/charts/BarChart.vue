@@ -44,16 +44,27 @@ const options = computed<ChartOptions<'bar'>>(() => ({
         : undefined,
     },
   },
-  scales: {
-    x: { stacked: props.stacked, grid: { display: props.horizontal, color: '#f1f5f9' }, border: { display: false }, ticks: { maxRotation: 0, autoSkip: true } },
-    y: {
-      stacked: props.stacked,
-      beginAtZero: true,
-      grid: { display: !props.horizontal, color: '#f1f5f9' },
-      border: { display: false },
-      ticks: { precision: 0, callback: (value) => (props.valueFormatter ? props.valueFormatter(Number(value)) : value) },
-    },
-  },
+  scales: props.horizontal
+    ? {
+        x: {
+          stacked: props.stacked,
+          beginAtZero: true,
+          grid: { display: true, color: '#f1f5f9' },
+          border: { display: false },
+          ticks: { precision: 0, callback: (value) => (props.valueFormatter ? props.valueFormatter(Number(value)) : value) },
+        },
+        y: { stacked: props.stacked, grid: { display: false }, border: { display: false }, ticks: { autoSkip: false } },
+      }
+    : {
+        x: { stacked: props.stacked, grid: { display: false }, border: { display: false }, ticks: { maxRotation: 0, autoSkip: true } },
+        y: {
+          stacked: props.stacked,
+          beginAtZero: true,
+          grid: { display: true, color: '#f1f5f9' },
+          border: { display: false },
+          ticks: { precision: 0, callback: (value) => (props.valueFormatter ? props.valueFormatter(Number(value)) : value) },
+        },
+      },
 }))
 </script>
 

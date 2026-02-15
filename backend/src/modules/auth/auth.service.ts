@@ -6,6 +6,7 @@ import { ErrorCodes } from '../../common/errors/error-codes';
 import { AccessTokenPayload, AuthenticatedUser, RefreshTokenPayload } from '../../common/interfaces/authenticated-user.interface';
 import { formatTimestamp } from '../../common/utils/date.util';
 import { hashPassword, verifyPassword } from '../../common/utils/password.util';
+import { randomToken } from '../../common/utils/token.util';
 import { RequestMeta } from '../../common/utils/request-meta.util';
 import { NotificationsService } from '../notifications/notifications.service';
 import { SessionsService } from '../sessions/sessions.service';
@@ -176,7 +177,7 @@ export class AuthService {
     const accessTtl = this.configService.getOrThrow<number>('jwt.accessTtl');
     const refreshTtl = this.configService.getOrThrow<number>('jwt.refreshTtl');
     const accessPayload: AccessTokenPayload = { sub: user.id, role: user.role, sid: sessionId, type: 'access' };
-    const accessToken = await this.jwtService.signAsync(accessPayload, {
+    const accessToken = await this.jwtService.signAsync({ ...accessPayload, jti: randomToken(8) }, {
       secret: this.configService.getOrThrow<string>('jwt.accessSecret'),
       expiresIn: accessTtl,
     });
@@ -186,7 +187,7 @@ export class AuthService {
 
   private signRefresh(userId: string, sessionId: string): Promise<string> {
     const payload: RefreshTokenPayload = { sub: userId, sid: sessionId, type: 'refresh' };
-    return this.jwtService.signAsync(payload, {
+    return this.jwtService.signAsync({ ...payload, jti: randomToken(8) }, {
       secret: this.configService.getOrThrow<string>('jwt.refreshSecret'),
       expiresIn: this.configService.getOrThrow<number>('jwt.refreshTtl'),
     });

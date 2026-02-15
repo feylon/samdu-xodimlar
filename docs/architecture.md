@@ -35,30 +35,30 @@ Barcha konteynerlar `hrms` nomli bridge tarmoqda. Backend file-service ni to'g'r
 
 Manba: `backend/src/app.module.ts`. Global provayderlar: `ThrottlerGuard`, `JwtAuthGuard`, `RolesGuard` (APP_GUARD, shu tartibda), `AuditInterceptor` (APP_INTERCEPTOR), `HttpExceptionFilter` (APP_FILTER).
 
-| Modul | Saqlash | Mas'uliyat |
-|---|---|---|
-| `config` | - | `loadConfiguration()`: env o'zgaruvchilarni o'qiydi, `JWT_ACCESS_SECRET` va `JWT_REFRESH_SECRET` bo'lmasa xato bilan to'xtaydi |
-| `database` | PostgreSQL | `data-source.ts` (TypeORM DataSource, `synchronize: false`, `migrationsTableName: typeorm_migrations`), `entities.ts`, `run-migrations.ts`, `seed.ts`, `migrations/` |
-| `common` | - | Decorators (`@Public`, `@Roles`, `@CurrentUser`, `@RequestMetadata`, `@SkipAudit`), guards, enums, `ErrorCodes`, utils (sana Asia/Tashkent, argon2, sha256, payload sanitizatsiya, user-agent parsing), `HttpExceptionFilter` |
-| `auth` | - | Web login/refresh/logout/me/change-password, o'z sessiyalari va login tarixi; `JwtStrategy` har so'rovda sessiyani MongoDB da tekshiradi |
-| `sessions` | MongoDB `sessions`, `login_history` | Sessiya yaratish, refresh token hash rotation, bekor qilish, login urinishlarini yozish |
-| `users` | PostgreSQL `users`, `employee_status_history` | `UsersController` (`/users`, faqat SUPERADMIN: HR yaratish, istalgan foydalanuvchini tahrirlash, login/parolni tiklash) va `EmployeesController` (`/employees`, HR onboarding, holat, yuklamalar, transfer) |
-| `departments` | PostgreSQL `departments`, `department_assignments` | Bo'limlar, boshliq tayinlash (rolni avtomatik ko'tarish/tushirish), `DepartmentScopeService` - rol va bo'lim bo'yicha ko'rinish doirasini hisoblash |
-| `calendar` | PostgreSQL `calendar_days` | Standart Du-Ju ish kuni, Sha-Ya dam olish; `calendar_days` dagi yozuvlar override |
-| `attendance` | PostgreSQL `attendance_records` | Faqat bugungi davomat, bo'lim boshlig'i belgilaydi, oylik xulosa |
-| `tasks` | PostgreSQL `tasks` | Vazifa hayot sikli, tasdiqlashda `KpiService.award` |
-| `kpi` | PostgreSQL `point_transactions`, `monthly_kpi_summaries` | Ball tranzaksiyalari, leaderboard, qo'lda tuzatish, oylik snapshot cron |
-| `daily-reports` | MongoDB `daily_reports` | Kunlik hisobot (kuniga bitta), baholash -> ball, eslatma cron |
-| `payroll` | PostgreSQL `payroll_records` | Oylik hisob-kitob, `CALCULATED -> PAID`, breakdown JSON |
-| `announcements` | PostgreSQL `announcements` | Bo'lim yoki tashkilot miqyosidagi e'lonlar, bildirishnoma tarqatish |
-| `polls` | MongoDB `polls` | So'rovnomalar, ovoz berish, natijalarni ko'rish qoidalari |
-| `notifications` | MongoDB `notifications` | `@Global()` modul: REST ro'yxat/o'qilgan deb belgilash + Socket.IO gateway (`/ws`) |
-| `audit` | MongoDB `audit_logs` | `@Global()` modul: `AuditInterceptor` va SUPERADMIN uchun `/audit/*` |
-| `organization` | PostgreSQL `organization_settings` | Brending, valyuta, ball qiymati, bo'lim boshlig'i koeffitsientlari, hisobot deadline soati |
-| `dashboard` | - | Rolga mos statistika (`GET /api/dashboard`) |
-| `export` | - | `POST /api/export/excel` va `/pdf` (exceljs, pdfmake) |
-| `mobile` | - | `/api/mobile/*` - `AuthService`, `DashboardService`, `NotificationsService` ni qayta ishlatadi, Swagger tegi "Mobile App Operations" |
-| `health` | - | `GET /api/health` - PostgreSQL `SELECT 1` va Mongo `readyState` |
+| Modul           | Saqlash                                                  | Mas'uliyat                                                                                                                                                                                                                    |
+| --------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `config`        | -                                                        | `loadConfiguration()`: env o'zgaruvchilarni o'qiydi, `JWT_ACCESS_SECRET` va `JWT_REFRESH_SECRET` bo'lmasa xato bilan to'xtaydi                                                                                                |
+| `database`      | PostgreSQL                                               | `data-source.ts` (TypeORM DataSource, `synchronize: false`, `migrationsTableName: typeorm_migrations`), `entities.ts`, `run-migrations.ts`, `seed.ts`, `migrations/`                                                          |
+| `common`        | -                                                        | Decorators (`@Public`, `@Roles`, `@CurrentUser`, `@RequestMetadata`, `@SkipAudit`), guards, enums, `ErrorCodes`, utils (sana Asia/Tashkent, argon2, sha256, payload sanitizatsiya, user-agent parsing), `HttpExceptionFilter` |
+| `auth`          | -                                                        | Web login/refresh/logout/me/change-password, o'z sessiyalari va login tarixi; `JwtStrategy` har so'rovda sessiyani MongoDB da tekshiradi                                                                                      |
+| `sessions`      | MongoDB `sessions`, `login_history`                      | Sessiya yaratish, refresh token hash rotation, bekor qilish, login urinishlarini yozish                                                                                                                                       |
+| `users`         | PostgreSQL `users`, `employee_status_history`            | `UsersController` (`/users`, faqat SUPERADMIN: HR yaratish, istalgan foydalanuvchini tahrirlash, login/parolni tiklash) va `EmployeesController` (`/employees`, HR onboarding, holat, yuklamalar, transfer)                   |
+| `departments`   | PostgreSQL `departments`, `department_assignments`       | Bo'limlar, boshliq tayinlash (rolni avtomatik ko'tarish/tushirish), `DepartmentScopeService` - rol va bo'lim bo'yicha ko'rinish doirasini hisoblash                                                                           |
+| `calendar`      | PostgreSQL `calendar_days`                               | Standart Du-Ju ish kuni, Sha-Ya dam olish; `calendar_days` dagi yozuvlar override                                                                                                                                             |
+| `attendance`    | PostgreSQL `attendance_records`                          | Faqat bugungi davomat, bo'lim boshlig'i belgilaydi, oylik xulosa                                                                                                                                                              |
+| `tasks`         | PostgreSQL `tasks`                                       | Vazifa hayot sikli, tasdiqlashda `KpiService.award`                                                                                                                                                                           |
+| `kpi`           | PostgreSQL `point_transactions`, `monthly_kpi_summaries` | Ball tranzaksiyalari, leaderboard, qo'lda tuzatish, oylik snapshot cron                                                                                                                                                       |
+| `daily-reports` | MongoDB `daily_reports`                                  | Kunlik hisobot (kuniga bitta), baholash -> ball, eslatma cron                                                                                                                                                                 |
+| `payroll`       | PostgreSQL `payroll_records`                             | Oylik hisob-kitob, `CALCULATED -> PAID`, breakdown JSON                                                                                                                                                                       |
+| `announcements` | PostgreSQL `announcements`                               | Bo'lim yoki tashkilot miqyosidagi e'lonlar, bildirishnoma tarqatish                                                                                                                                                           |
+| `polls`         | MongoDB `polls`                                          | So'rovnomalar, ovoz berish, natijalarni ko'rish qoidalari                                                                                                                                                                     |
+| `notifications` | MongoDB `notifications`                                  | `@Global()` modul: REST ro'yxat/o'qilgan deb belgilash + Socket.IO gateway (`/ws`)                                                                                                                                            |
+| `audit`         | MongoDB `audit_logs`                                     | `@Global()` modul: `AuditInterceptor` va SUPERADMIN uchun `/audit/*`                                                                                                                                                          |
+| `organization`  | PostgreSQL `organization_settings`                       | Brending, valyuta, ball qiymati, bo'lim boshlig'i koeffitsientlari, hisobot deadline soati                                                                                                                                    |
+| `dashboard`     | -                                                        | Rolga mos statistika (`GET /api/dashboard`)                                                                                                                                                                                   |
+| `export`        | -                                                        | `POST /api/export/excel` va `/pdf` (exceljs, pdfmake)                                                                                                                                                                         |
+| `mobile`        | -                                                        | `/api/mobile/*` - `AuthService`, `DashboardService`, `NotificationsService` ni qayta ishlatadi, Swagger tegi "Mobile App Operations"                                                                                          |
+| `health`        | -                                                        | `GET /api/health` - PostgreSQL `SELECT 1` va Mongo `readyState`                                                                                                                                                               |
 
 ## Ma'lumot oqimlari
 
@@ -115,11 +115,11 @@ Sessiya bekor qilinganda (`logout`, parol o'zgarishi, admin tomonidan tiklash, T
 
 ## PostgreSQL va MongoDB bo'linishi
 
-| PostgreSQL (TypeORM) | MongoDB (Mongoose) |
-|---|---|
+| PostgreSQL (TypeORM)                                                                                                                                                                                                 | MongoDB (Mongoose)                                                                                                                                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Tranzaksion, relyatsion, pul va hisobga olinadigan ma'lumot: foydalanuvchilar, bo'limlar, yuklamalar, davomat, vazifalar, ball tranzaksiyalari, oylik xulosalar, ish haqi, e'lonlar, kalendar, tashkilot sozlamalari | Yuqori yozish hajmi va o'zgaruvchan sxema: sessiyalar (TTL indeks), login tarixi, audit loglari (ixtiyoriy payload), kunlik hisobotlar (matn + biriktirmalar), so'rovnomalar (ichki `votes` massivi), bildirishnomalar (ixtiyoriy `data`), fayl metadata (alohida `hrms_files` bazasi) |
-| Sxema migratsiyalar orqali versiyalanadi, FK va unique cheklovlar bazada | Sxema kodda (Mongoose), indekslar ilova ishga tushganda yaratiladi |
-| Hisob-kitoblar (payroll, KPI) SQL agregatsiya bilan | Audit va sessiyalar asosiy bazaga yuk bermaydi, vaqt bo'yicha o'sadi |
+| Sxema migratsiyalar orqali versiyalanadi, FK va unique cheklovlar bazada                                                                                                                                             | Sxema kodda (Mongoose), indekslar ilova ishga tushganda yaratiladi                                                                                                                                                                                                                     |
+| Hisob-kitoblar (payroll, KPI) SQL agregatsiya bilan                                                                                                                                                                  | Audit va sessiyalar asosiy bazaga yuk bermaydi, vaqt bo'yicha o'sadi                                                                                                                                                                                                                   |
 
 Ikki baza orasida tranzaksiya yo'q. Masalan, hisobot baholanganda hisobot Mongo da saqlanadi, keyin ball PostgreSQL ga yoziladi; ikkinchi qadam muvaffaqiyatsiz bo'lsa hisobot "baholangan" bo'lib qoladi. Bu holatlarni audit log orqali tekshirish mumkin.
 
@@ -133,12 +133,12 @@ Ikki baza orasida tranzaksiya yo'q. Masalan, hisobot baholanganda hisobot Mongo 
 
 Ikkalasi `@nestjs/schedule` orqali, `timeZone: APP_TIMEZONE` (`TZ`, standart `Asia/Tashkent`). Bir nechta backend instansiya ishlatilsa, cron har birida bajariladi; snapshot idempotent (`findOne` + `save`), eslatma esa ikki marta yuborilishi mumkin.
 
-| Cron ifodasi | Qayerda | Nima qiladi |
-|---|---|---|
-| `0 5 0 1 * *` (har oyning 1-kuni 00:05:00) | `KpiService.snapshotPreviousMonth` | O'tgan oy uchun barcha EMPLOYEE va DEPARTMENT_HEAD lar bo'yicha `monthly_kpi_summaries` yozuvini yaratadi/yangilaydi: ballar manbalar bo'yicha, vazifalar soni, davomat nisbati. Joriy oy ballari `point_transactions.year/month` filtri sababli o'z-o'zidan noldan boshlanadi |
-| `0 * * * *` (har soat boshida) | `DailyReportsService.remindMissingReports` | Joriy soat `organization_settings.reportDeadlineHour` ga teng bo'lsa va bugun ish kuni bo'lsa, hisobot yubormagan ACTIVE xodimlarga (faol yuklamasi borlarga) `REPORT_MISSING` bildirishnomasi |
+| Cron ifodasi                               | Qayerda                                    | Nima qiladi                                                                                                                                                                                                                                                                    |
+| ------------------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `0 5 0 1 * *` (har oyning 1-kuni 00:05:00) | `KpiService.snapshotPreviousMonth`         | O'tgan oy uchun barcha EMPLOYEE va DEPARTMENT_HEAD lar bo'yicha `monthly_kpi_summaries` yozuvini yaratadi/yangilaydi: ballar manbalar bo'yicha, vazifalar soni, davomat nisbati. Joriy oy ballari `point_transactions.year/month` filtri sababli o'z-o'zidan noldan boshlanadi |
+| `0 * * * *` (har soat boshida)             | `DailyReportsService.remindMissingReports` | Joriy soat `organization_settings.reportDeadlineHour` ga teng bo'lsa va bugun ish kuni bo'lsa, hisobot yubormagan ACTIVE xodimlarga (faol yuklamasi borlarga) `REPORT_MISSING` bildirishnomasi                                                                                 |
 
-Snapshotni qo'lda ham chaqirish mumkin: `POST /api/kpi/snapshot?year=2026&month=9` (SUPERADMIN, HR).
+Snapshotni qo'lda ham chaqirish mumkin: `POST /api/kpi/snapshot?year=2025&month=9` (SUPERADMIN, HR).
 
 ## So'rov hayot sikli (backend)
 
