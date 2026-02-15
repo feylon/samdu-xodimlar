@@ -9,8 +9,11 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AccessTokenPayload } from '../../common/interfaces/authenticated-user.interface';
+import { SessionsService } from '../sessions/sessions.service';
 
-@WebSocketGateway({ namespace: '/ws', cors: { origin: true, credentials: true } })
+const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:3002').split(',').map((origin) => origin.trim()).filter(Boolean);
+
+@WebSocketGateway({ namespace: '/ws', cors: { origin: allowedOrigins, credentials: true } })
 export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
@@ -20,6 +23,7 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly sessionsService: SessionsService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -35,6 +39,10 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
       const payload = await this.jwtService.verifyAsync<AccessTokenPayload>(token, {
         secret: this.configService.get<string>('jwt.accessSecret'),
       });
+      if (payload.type !== 'access' || !(await this.sessionsService.findActive(payload.sid))) {
+        client.disconnect(true);
+        return;
+      }
       client.data.userId = payload.sub;
       client.data.sessionId = payload.sid;
       await client.join(this.userRoom(payload.sub));

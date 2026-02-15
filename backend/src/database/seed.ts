@@ -12,12 +12,17 @@ const seed = async () => {
   const settingsRepository = AppDataSource.getRepository(OrganizationSettings);
   const existingSettings = await settingsRepository.findOne({ where: { id: 1 } });
   if (!existingSettings) {
-    await settingsRepository.save(settingsRepository.create({ id: 1, name: 'Xodimlar HRMS', description: 'Xodimlarni boshqarish tizimi' }));
+    await settingsRepository.save(
+      settingsRepository.create({ id: 1, name: 'Xodimlar HRMS', description: 'Xodimlarni boshqarish tizimi', reportDeadlineHour: config.reportReminderHour }),
+    );
     process.stdout.write('Seeded organization settings\n');
   }
 
   const userRepository = AppDataSource.getRepository(User);
-  const existingSuperadmin = await userRepository.findOne({ where: { login: config.seed.superadminLogin } });
+  const existingSuperadmin = await userRepository
+    .createQueryBuilder('user')
+    .where('LOWER(user.login) = LOWER(:login)', { login: config.seed.superadminLogin })
+    .getOne();
   if (!existingSuperadmin) {
     await userRepository.save(
       userRepository.create({

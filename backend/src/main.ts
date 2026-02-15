@@ -13,7 +13,7 @@ const bootstrap = async () => {
 
   app.set('trust proxy', true);
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-  app.enableCors({ origin: configService.getOrThrow<string[]>('corsOrigins'), credentials: true });
+  app.enableCors({ origin: configService.getOrThrow<string[]>('corsOrigins'), credentials: true, exposedHeaders: ['Content-Disposition'] });
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, forbidUnknownValues: false, transformOptions: { enableImplicitConversion: false } }));
   app.enableShutdownHooks();
