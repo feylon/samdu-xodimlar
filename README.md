@@ -2,6 +2,15 @@
 
 Tashkilot xodimlarini boshqarish tizimi (Human Resource Management System). Monorepo uchta xizmatdan iborat: NestJS backend API, alohida fayl xizmati (file-service) va Nuxt 3 SPA frontend. Ma'lumotlar PostgreSQL (asosiy biznes jadvallar) va MongoDB (sessiyalar, audit, bildirishnomalar, hisobotlar, so'rovnomalar, fayl metadata) da saqlanadi.
 
+## Yangilanish — 2026-10-07
+
+Tizim 2026-yil 7-oktabr kuni yangilandi va hozirda Samarqand davlat universitetida ishga tushirish jarayonida. Shu yangilanish doirasida:
+
+- barcha sahifalar va Swagger hujjatlari skrinshotga olindi (`docs/screenshots/`, jami 33 ta rasm);
+- har bir sahifaning vazifasi va imkoniyatlari rol bo'yicha tavsiflandi: [docs/sahifalar.md](docs/sahifalar.md);
+- tashkilot brendingi (nom, logotip, rang) tashkilot sozlamalari orqali universitet uchun moslashtirilmoqda;
+- ishga tushirish `docker compose up -d --build` orqali, barcha xizmatlar health tekshiruvidan o'tgan holda bajariladi.
+
 ## Nimalarni qamrab oladi
 
 - Rollar: `SUPERADMIN`, `HR`, `DEPARTMENT_HEAD`, `EMPLOYEE`

@@ -14,6 +14,7 @@ Barcha hujjatlar o'zbek tilida (lotin yozuvi), texnik atamalar inglizcha qoldiri
 | [operations.md](operations.md) | Operator uchun kundalik qo'llanma: rollar bo'yicha onboarding, oylik ish haqi sikli, kalendar, KPI oy almashinuvi, eslatmalar, bloklangan xodimlar, parolni tiklash, audit, eksport, backup, loglar |
 | [frontend.md](frontend.md) | Nuxt ilovasi tuzilishi, Pinia store'lar, i18n, routing/middleware, DataTable + eksport, Socket.IO integratsiyasi, brending, build va ishga tushirish |
 | [mobile-api.md](mobile-api.md) | Mobil dasturchilar uchun: login/refresh oqimi JSON namunalari bilan, sessiya endpointlari, push token, socket eventlari, xatolarni qayta ishlash |
+| [sahifalar.md](sahifalar.md) | Barcha sahifalar va Swagger ekranlari skrinshotlar bilan, rol bo'yicha tavsif (2026-10-07 yangilanishi) |
 | [api.md](api.md) | Swagger (`GET /api/docs-json`) dan avtomatik yaratilgan endpointlar jadvali. Qo'lda tahrirlanmaydi |
 | [superpowers/specs/2025-03-02-hrms-design.md](superpowers/specs/2025-03-02-hrms-design.md) | Dastlabki dizayn spetsifikatsiyasi (qabul qilingan qarorlar) |
 
